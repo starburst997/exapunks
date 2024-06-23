@@ -1,6 +1,6 @@
 # 28: Last Stop Snaxnet (Warehouse 27)
 
-<div align="center"><img src="EXAPUNKS - Last Stop SNAXNET (301, 98, 30, 2022-12-05-19-37-37).gif" /></div>
+<div align="center"><img src="EXAPUNKS - Last Stop SNAXNET (373, 99, 27, 2023-12-01-13-37-59).gif" /></div>
 
 ## Instructions
 > An array of five Zippe-type gas centrifuges, ZGC0 through ZGC4, are connected in a cascade configuration.
@@ -9,105 +9,121 @@
 
 ## Solution
 
+### [XA](XA.exa) (global)
+```asm
+LINK 800
+LINK 799
+MAKE
+MARK 1
+COPY M T
+FJMP 2
+TEST #ZGC0 > X
+FJMP 2
+COPY #ZGC0 X
+COPY 0 F
+SEEK -1
+MARK 2
+COPY M T
+FJMP 3
+TEST #ZGC1 > X
+FJMP 3
+COPY #ZGC1 X
+COPY 1 F
+SEEK -1
+MARK 3
+COPY M T
+FJMP 4
+TEST #ZGC2 > X
+FJMP 4
+COPY #ZGC2 X
+COPY 2 F
+SEEK -1
+MARK 4
+COPY M T
+FJMP 5
+TEST #ZGC3 > X
+FJMP 5
+COPY #ZGC3 X
+COPY 3 F
+SEEK -1
+MARK 5
+COPY M T
+FJMP NXT
+TEST #ZGC4 > X
+FJMP NXT
+COPY #ZGC4 X
+COPY 4 F
+SEEK -1
+MARK NXT
+COPY F M
+COPY 0 X
+SEEK -1
+JUMP 1
+```
+
 ### [XB](XB.exa) (global)
 ```asm
+MAKE
+@REP 5
+COPY 1 F
+@END
 LINK 800
 LINK 798
 
-MARK FWD_LISTENS
+MARK LO
+SEEK -9999
+MARK SCAN
+COPY F M
+TEST EOF
+FJMP SCAN
+SEEK -9999
+
 COPY M X
 COPY X T
-FJMP END
-
-MARK FWD
+FJMP OFF
+MARK THERE
 LINK 800
 SUBI T 1 T
-TJMP FWD
+FJMP OFF
+JUMP THERE
+
+MARK OFF 
 COPY 0 #POWR
-COPY 2 M
 COPY X T
+FJMP CLEAR
 
-MARK BWD
-LINK -1
+MARK BACK
 SUBI T 1 T
-TJMP BWD
-JUMP FWD_LISTENS
+LINK -1
+TJMP BACK
 
-MARK END
-COPY 0 #POWR
-COPY 2 M
-JUMP FWD_LISTENS
-```
+MARK CLEAR
+SEEK -9999
+SEEK X
+COPY 0 F
 
-### [XD](XD.exa) (local)
-```asm
-LINK 800
-LINK 799
-
-MAKE
-
-MARK START
-COPY -1 X
-
-MARK COUNTER
-TEST X = 4
-TJMP SEND
-
-ADDI X 1 X
-TEST M = 1
-FJMP COUNTER
-
-; SAVE COUNTER
-COPY X F
-JUMP COUNTER
-
-MARK SEND
-SEEK -1
-MODE
-COPY F M
-VOID M
-MODE
-COPY 2 M
-JUMP START
-```
-
-### [XA](XA.exa) (local)
-```asm
-LINK 800
-LINK 799
-
-; UNROLL FOR BETTER CYCL
-@REP 5
-MARK TEST@{0,1}
-TEST #ZGC@{0,1} > X
-TJMP COPY@{0,1}
-COPY 0 M
-@END
-
-MARK TEST5
-TEST X = 0
-TJMP KILL
-VOID M
 COPY 0 X
-JUMP TEST0
+SEEK -9999
+MARK CHECK
+ADDI X F X
+TEST EOF
+FJMP CHECK
+COPY X T
+FJMP KILL
 
-@REP 5
-MARK COPY@{0,1}
-COPY #ZGC@{0,1} X
-COPY 1 M
-JUMP TEST@{1,1}
-@END
+JUMP LO
 
 MARK KILL
-KILL
-GRAB 400
 WIPE
 LINK -1
-LINK 798
+LINK 799
 KILL
+GRAB 401
+WIPE
+
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 301    | 98   | 30       |
+| 373    | 99   | 27       |

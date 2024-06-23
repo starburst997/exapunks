@@ -1,6 +1,6 @@
 # 9: SFCTA Highway Sign #4902 (Remote Access Interface)
 
-<div align="center"><img src="EXAPUNKS - SFCTA Highway Sign 4902 (167, 11, 1, 2022-12-05-19-21-05).gif" /></div>
+<div align="center"><img src="EXAPUNKS - SFCTA Highway Sign #4902 (140, 15, 4, 2023-12-01-13-06-11).gif" /></div>
 
 ## Instructions
 > Write EMBER-2's message (file 300) to the highway sign. The file contains one character value for each position on the sign from left to right, top to bottom.
@@ -11,20 +11,28 @@
 
 ### [XA](XA.exa) (global)
 ```asm
-GRAB 300
 LINK 800
-COPY 0 X
 MARK LOOP
 DIVI X 9 #DATA
 MODI X 9 #DATA
-COPY F #DATA
+COPY M #DATA
 ADDI X 1 X
+JUMP LOOP
+```
+
+### [XB](XB.exa) (global)
+```asm
+GRAB 300
+MARK LO
+COPY F M
 TEST EOF
-FJMP LOOP
-WIPE
+FJMP LO
+LINK 800
+KILL
+LINK -1
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 167    | 11   | 1        |
+| 140    | 15   | 4        |

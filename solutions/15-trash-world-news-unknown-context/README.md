@@ -1,6 +1,6 @@
 # 15: Trash World News (Unknown Context)
 
-<div align="center"><img src="EXAPUNKS - TRASH WORLD NEWS (568, 26, 4, 2022-12-05-19-22-30).gif" /></div>
+<div align="center"><img src="EXAPUNKS - TRASH WORLD NEWS (810, 27, 4, 2023-12-01-13-11-13).gif" /></div>
 
 ## Instructions
 > ﻿Find and replace the keywords in the target message (file 212) as directed by EMBER-2.
@@ -16,10 +16,10 @@
 GRAB 300
 MARK LOOP
 COPY F M
-COPY F M
 TEST EOF
 FJMP LOOP
-COPY 666 M
+COPY 0 M
+
 ```
 
 ### [XB](XB.exa) (global)
@@ -27,26 +27,31 @@ COPY 666 M
 LINK 800
 LINK 799
 GRAB 212
-MARK REPLACE
+MARK LOOP
 COPY M X
-TEST X = 666
+TEST X = 0
 TJMP END
-SEEK -9999
-MARK SEARCH
+MARK SEA
 TEST F = X
-FJMP SEARCH
+TJMP HIT
+JUMP SEA
+MARK HIT
 SEEK -1
 COPY M F
-JUMP REPLACE
-
+SEEK -9999
+JUMP LOOP
 MARK END
-DROP
-LINK -1
+```
+
+### [XC](XC.exa) (global)
+```asm
+LINK 800
 GRAB 200
 LINK 800
+HALT
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 568    | 26   | 4        |
+| 810    | 27   | 4        |

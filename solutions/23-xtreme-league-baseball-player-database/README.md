@@ -1,6 +1,6 @@
 # 23: Xtreme League Baseball (Player Database)
 
-<div align="center"><img src="EXAPUNKS - Xtreme League Baseball (294, 70, 24, 2022-12-05-19-35-36).gif" /></div>
+<div align="center"><img src="EXAPUNKS - Xtreme League Baseball (239, 55, 2, 2023-12-01-13-28-40).gif" /></div>
 
 ## Instructions
 > The hosts *active* and *penalty* contain files that correspond to extreme baseball players (files 200-299), along with a directory file that contains a list of those files' IDs (file 199). Each player file contains their name and the following statistics in this order: BA, ZA, APB, WRT, OI, OD, PC, and PS.
@@ -15,101 +15,83 @@
 
 ### [XA](XA.exa) (local)
 ```asm
+NOTE ($1+$2+$3)/3+
+NOTE $4*$5/$6+
+NOTE ($7-$8)*20
+
 LINK 800
-
 GRAB 199
-
-MARK READ
+MARK LO
 COPY F M
 TEST EOF
-TJMP END
-COPY 1 M
-JUMP READ
-
-MARK END
-DROP
-LINK -1
-COPY -2 M
-LINK 800
-COPY -2 M
+FJMP LO
+COPY 0 M
 ```
 
 ### [XB](XB.exa) (local)
 ```asm
 LINK 800
-
-MARK LOOP
-GRAB M
-
-SEEK 1
-ADDI F F X
-ADDI F X X
+MARK LO
+COPY M T
+FJMP END
+GRAB T
+MODE
+COPY F M
+COPY F X
+ADDI X F X
+ADDI X F X
 DIVI X 3 X
-COPY X T
-MULI F F X
-DIVI X F X
-ADDI X T X
-COPY X T
-SUBI F F X
-MULI 20 X X
-ADDI T X X
-
-; BROADCAST VALUE + NAME
-SEEK -9999
 COPY F T
+MULI T F T
+DIVI T F T
+ADDI X T X
+COPY F T
+SUBI T F T
+MULI T 20 T
+ADDI X T M
 DROP
-LINK -1
-COPY X M
-COPY X M
-COPY X M
-COPY T M
-LINK 800
+MODE
+JUMP LO
 
-TEST M = -2
-TJMP END
-
-JUMP LOOP
 
 MARK END
+MODE
+COPY 0 M
+
 ```
 
-### [XC](XC.exa) (local)
+### [XC](XC.exa) (global)
 ```asm
 MAKE
-
-MARK LOOP
-TEST M = -2
-TJMP LAST
-TEST M > X
-TJMP GREATER
-VOID M
-VOID M
-JUMP LOOP
-
-MARK LAST
-VOID M
-TEST M > X
-TJMP GREATER_LAST
-VOID M
-VOID M
-DROP
-HALT
-
-MARK GREATER_LAST
-VOID M
-SEEK -1
-COPY M F
-DROP
-HALT
-
-MARK GREATER
+COPY 0 F
+COPY 0 F
+MARK LO
+COPY M T
+FJMP END
+COPY T F
 COPY M X
+SEEK -2
+TEST F < X
+TJMP NEW
+VOID F
+JUMP LO
+
+MARK NEW
+SEEK -2
+VOID F
+VOID F
+SEEK 1
+COPY X F
+JUMP LO
+
+
+MARK END
 SEEK -1
-COPY M F
-JUMP LOOP
+VOID F
+
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 294    | 70   | 24       |
+| 239    | 55   | 2        |

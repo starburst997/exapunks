@@ -1,6 +1,6 @@
 # 5: Euclid's Pizza (Order System)
 
-<div align="center"><img src="EXAPUNKS - Euclid's Pizza (13, 14, 1, 2022-12-05-19-20-15).gif" /></div>
+<div align="center"><img src="EXAPUNKS - Euclid's Pizza (24, 13, 1, 2023-12-01-13-01-50).gif" /></div>
 
 ## Instructions
 > Append your order (file 300) to the end of the order list (file 200).
@@ -12,11 +12,10 @@
 ### [XA](XA.exa) (global)
 ```asm
 GRAB 300
+MARK LOOP
 COPY F M
-COPY F M
-COPY F M
-COPY F M
-COPY F M
+TEST EOF
+FJMP LOOP
 ```
 
 ### [XB](XB.exa) (global)
@@ -24,14 +23,15 @@ COPY F M
 LINK 800
 GRAB 200
 SEEK 9999
+COPY 5 T
+MARK LOOP
 COPY M F
-COPY M F
-COPY M F
-COPY M F
-COPY M F
+SUBI T 1 T
+TJMP LOOP
+
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 13     | 14   | 1        |
+| 24     | 13   | 1        |

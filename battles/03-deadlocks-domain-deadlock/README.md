@@ -1,6 +1,6 @@
 # 3: Deadlock's Domain (Deadlock)
 
-<div align="center"><img src="EXAPUNKS - Deadlock's Domain (2022-12-05-19-35-20).gif" /></div>
+<div align="center"><img src="EXAPUNKS - Deadlock's Domain (2023-12-01-13-27-59).gif" /></div>
 
 ## Instructions
 > To win this battle you must grab files as they spawn in the central hosts and bring them back to your host. 
@@ -17,34 +17,35 @@
 
 ### [XA](XA.exa) (global)
 ```asm
-MARK BEGIN
-COPY 800 X
-REPL START
-COPY 801 X
-REPL START
-COPY 802 X
-JUMP BEGIN
-
-MARK START
 LINK 800
-LINK X
-KILL
+LINK 801
 LINK 799
 KILL
-LINK X
-KILL
-GRAB #FILE
-LINK -1
-LINK -1
-DROP
 
-MARK LOOP
+MARK LO
+REPL A
+REPL B
+REPL C
+JUMP LO
+
+MARK A
 LINK 800
-LINK X
 GRAB #FILE
 LINK -1
 LINK -1
-DROP
-JUMP LOOP
+HALT
+MARK B
+LINK 801
+GRAB #FILE
+LINK -1
+LINK -1
+HALT
+MARK C
+LINK 802
+GRAB #FILE
+LINK -1
+LINK -1
+HALT
+
 ```
 

@@ -1,6 +1,6 @@
 # 32: Unknown Network 2 (Unknown Context)
 
-<div align="center"><img src="EXAPUNKS - UNKNOWN NETWORK 2 (243, 55, 53, 2022-12-05-19-41-10).gif" /></div>
+<div align="center"><img src="EXAPUNKS - UNKNOWN NETWORK 2 (437, 49, 85, 2023-12-01-13-51-08).gif" /></div>
 
 ## Instructions
 > Terminate all other EXAs and bring any files they were holding back to your host. Only EXAs in the central host will be holding files, and their file IDs will always be between 200 and 299, inclusive.
@@ -11,44 +11,51 @@
 
 ### [XA](XA.exa) (global)
 ```asm
-; GRAB FILE
+MARK LO
 
-@REP 5
+REPL SCOUT
+
+
+MARK SCOUT
 LINK 800
-@END
-
-@REP 6
-KILL
-@END
-
-COPY 200 X
-MARK LOOP_BRING_FILE
-@REP 10
-REPL BRING_FILE
-ADDI X 1 X
-@END
-TEST X < 300
-TJMP LOOP_BRING_FILE
-
-@REP 4
-LINK -1
+LINK 800
+LINK 800
+LINK 800
+MARK KILL
+@REP 5
 REPL KILLER
 @END
-HALT
+NOOP
+NOOP
+NOOP
 
-MARK KILLER
-KILL
-KILL
-HALT
+LINK 800
+COPY 100 T
+MARK FETCH
+SUBI T 1 T
+ADDI T 200 X
+REPL FETCHER
+TJMP FETCH
+@REP 5
+LINK -1
+REPL KILLER
+REPL KILLER
+@END
 
-MARK BRING_FILE
+
+MARK FETCHER
 GRAB X
 @REP 5
 LINK -1
-@END
+@END 
+HALT
+
+MARK KILLER
+LINK 800
+KILL
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 243    | 55   | 53       |
+| 437    | 49   | 85       |

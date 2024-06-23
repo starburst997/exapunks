@@ -1,6 +1,6 @@
 # 18: TEC EXA-Blaster Modem (Radio Stations)
 
-<div align="center"><img src="EXAPUNKS - TEC EXA-Blaster� Modem (874, 57, 18, 2022-12-05-19-32-10).gif" /></div>
+<div align="center"><img src="EXAPUNKS - TEC EXA-Blaster™ Modem (493, 60, 19, 2023-12-01-13-19-00).gif" /></div>
 
 ## Instructions
 > ﻿Connect to each radio station and replace every song in the playlist (file 200) with ‗CAN'T (NOT) GET OVER YOU‗ by ‗ME2U‗ (file 300). Each song in a playlist consists of two keywords: the song name and the artist name.
@@ -16,62 +16,79 @@
 ### [XA](XA.exa) (local)
 ```asm
 GRAB 300
-LINK 800
-
-MARK DIAL
-MODE
-TEST MRD
-FJMP STOP
-@REP 11
-COPY M #DIAL
-@END
-
-LINK 800
-MODE
-REPL BOT
-
-COPY M X
-MARK COPY
+MARK LO
 COPY F M
 COPY F M
 SEEK -2
-TEST M = 1
-TJMP COPY
+JUMP LO
 
-LINK -1
-COPY -1 #DIAL
-JUMP DIAL
-
-MARK BOT
-GRAB 200
-
-MARK COPY_BOT
-COPY 1 M
-COPY M F
-COPY M F
-TEST EOF
-FJMP COPY_BOT
-COPY 0 M
-HALT
-
-MARK STOP
-LINK -1
 ```
 
 ### [XB](XB.exa) (global)
 ```asm
 GRAB 301
-
-MARK DIAL
-@REP 11
+REPL SPAWN
+MARK LO
+COPY 10 T
+MARK SEN
 COPY F M
-@END
-
+ADDI T -1 T
+TJMP SEN
+REPL SPAWN
+COPY F M
 TEST EOF
-FJMP DIAL
+FJMP LO
+KILL
+KILL
+WIPE
+LINK 800
+COPY -1 #DIAL
+HALT
+
+MARK SPAWN
+MAKE
+MODE
+COPY M F
+COPY M F
+MODE
+LINK 800
+COPY 11 T
+COPY -1 #DIAL
+MARK DIAL
+COPY M #DIAL
+ADDI T -1 T
+TJMP DIAL
+LINK 800
+MODE
+REPL WRI
+MARK TRA
+SEEK -9999
+COPY F M
+COPY F M
+COPY M T
+TJMP TRA
+WIPE
+HALT
+
+
+MARK WRI
+GRAB 200
+MARK LINE
+COPY M F
+COPY M F
+TEST EOF
+TJMP EOL
+COPY 1 M
+JUMP LINE
+MARK EOL
+COPY 0 M
+HALT
+
+
+
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 874    | 57   | 18       |
+| 493    | 60   | 19       |

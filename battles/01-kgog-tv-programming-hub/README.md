@@ -1,6 +1,6 @@
 # 1: KGOG-TV (Programming Hub)
 
-<div align="center"><img src="EXAPUNKS - KGOG-TV (2022-12-05-19-22-41).gif" /></div>
+<div align="center"><img src="EXAPUNKS - KGOG-TV (2023-12-01-13-12-04).gif" /></div>
 
 ## Instructions
 > To win this battle you must make your movies play for longer than your opponent's. A movie will play when that movie's file is the only movie file sitting in a *channel* host.
@@ -19,55 +19,42 @@
 
 ### [XA](XA.exa) (global)
 ```asm
-LINK 800
+MARK LOOP
+COPY 828 X
+COPY 210 T
+REPL SPAWN
+COPY 867 X
+COPY 211 T
+REPL SPAWN
+COPY 809 X
+COPY 0 T
+REPL SPAWN
+COPY 828 X
+COPY 210 T
+REPL SPAWN
+COPY 867 X
+COPY 0 T
+REPL SPAWN
+COPY 867 X
+COPY 211 T
+REPL SPAWN
+COPY 828 X
+COPY 0 T
+REPL SPAWN
+JUMP LOOP
 
-GRAB 211
-LINK 828
+
+MARK SPAWN
+LINK 800
+KILL
+FJMP NOP
+GRAB T
+MARK NOP
+LINK X
 DROP
-
-MARK FAILSAFE
-REPL REMOVE_230
-REPL REMOVE_231
-JUMP FAILSAFE
-
-MARK REMOVE_230
-GRAB 230
+RAND 230 231 T
+GRAB T
 LINK -1
-HALT
 
-MARK REMOVE_231
-GRAB 231
-LINK -1
-```
-
-### [XB](XB.exa) (global)
-```asm
-LINK 800
-
-GRAB 210
-LINK 867
-DROP
-
-MARK FAILSAFE
-REPL REMOVE_230
-REPL REMOVE_231
-JUMP FAILSAFE
-
-MARK REMOVE_230
-GRAB 230
-LINK -1
-HALT
-
-MARK REMOVE_231
-GRAB 231
-LINK -1
-```
-
-### [XC](XC.exa) (global)
-```asm
-LINK 800
-LINK 809
-GRAB 265
-LINK -1
 ```
 

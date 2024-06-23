@@ -1,6 +1,6 @@
 # 17: Digital Library Project (Patron Access System)
 
-<div align="center"><img src="EXAPUNKS - Digital Library Project (1489, 50, 37, 2022-12-05-19-31-17).gif" /></div>
+<div align="center"><img src="EXAPUNKS - Digital Library Project (345, 39, 74, 2023-12-01-13-17-57).gif" /></div>
 
 ## Instructions
 > Books are stored in the host corresponding to the first digit of their call number, while a book's file ID is 200 plus the last two digits of the call number. For example, book 512 would be stored in the host *500-599* as file 212.
@@ -13,76 +13,54 @@
 
 ## Solution
 
-### [XB](XB.exa) (global)
-```asm
-@REP 3
-NOOP
-@END
-
-MARK BOOK
-MODE
-TEST MRD
-FJMP STOP
-
-MAKE
-REPL BOT
-COPY M T
-MODE
-COPY T M
-MODE
-COPY M T
-MODE
-COPY T M
-
-MARK COPY
-TEST MRD
-FJMP END
-COPY M F
-NOOP
-JUMP COPY
-
-MARK END
-DROP
-JUMP BOOK
-
-MARK BOT
-MODE
-LINK 800
-COPY M X
-
-MARK HOST
-LINK 800
-SUBI X 1 X
-TEST X = 0
-FJMP HOST
-
-GRAB M
-MARK COPY_BOT
-COPY F M
-TEST EOF
-FJMP COPY_BOT
-
-MARK STOP
-```
-
 ### [XA](XA.exa) (local)
 ```asm
 GRAB 300
-MARK BOOK
-TEST EOF
-TJMP STOP
+MARK LOOP
 COPY F X
+ADDI X 300 X
+REPL FETCH
+TEST EOF
+FJMP LOOP
+HALT
 
-SWIZ X 0003 M
-SWIZ X 0021 X
-ADDI X 200 M
+MARK FETCH
+LINK 800
+SUBI X 100 X
+TEST X < 300
+FJMP FETCH
+REPL READ
+MAKE
+MARK WRITE
+COPY M T
+COPY T F
+TEST T = 0
+FJMP WRITE
+SEEK -1
+VOID F
+SEEK -9999
+COPY F X
+MARK HOME
+LINK -1
+ADDI X -100 X
+TEST X < 0
+FJMP HOME
+DROP
+HALT
 
-JUMP BOOK
+MARK READ
+GRAB X
+MARK LINE
+COPY F M
+TEST EOF
+FJMP LINE
+COPY 0 M
+HALT
 
-MARK STOP
+
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 1489   | 50   | 37       |
+| 345    | 39   | 74       |

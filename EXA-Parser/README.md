@@ -84,6 +84,21 @@ Linux:
 
 This is a small file I made up while "reverse-engineering" the file format. Each line represent the `id`, `locale file` and `title` for each level. It is currently missing the "Bonus" levels.
 
+## Workaround to use last opened solutions
+
+The EXA_Parser goes through all solutions and uses the fastest one. If you like to use the last opened Solution you can go to the solution directory and run the following:
+```
+mkdir tmp
+for i in *.solution; do grep LastSolutionOpen.*${i%.solution} save.dat || mv  -v ${i} tmp/; done
+```
+Thus the last opened solutions are the only ones around forcing EXA-Parser to use those.
+Now create the repo with EXA-parser and finaly undo this workaround by:
+```
+mv tmp/* .
+rm -r tmp
+```
+It's probably a good idea not to have the game open at the time.
+
 ## Issues
 Generated GIFs name are *bad*, the first 4 levels are all named "EXAPUNKS - TRASH WORLD NEWS". So you need to generate the GIFs in chronological order and not have any duplicates.
 

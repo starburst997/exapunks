@@ -1,6 +1,6 @@
 # 12: Workhouse (Work Management System)
 
-<div align="center"><img src="EXAPUNKS - WorkHouse (523, 28, 2, 2022-12-05-19-21-45).gif" /></div>
+<div align="center"><img src="EXAPUNKS - WorkHouse (413, 32, 3, 2023-12-01-22-07-55).gif" /></div>
 
 ## Instructions
 > Locate EMBER-2's user file in the *users* host and overwrite it so that the sum of the values is the same but no individual value exceeds $75. All values, except for the last, must be the maximum value ($75). You will need to add additional values to accomplish this.
@@ -16,21 +16,13 @@
 ### [XA](XA.exa) (global)
 ```asm
 GRAB 300
-COPY F X
+COPY F M
 DROP
 LINK 800
-GRAB 199
-MARK FIND_FILE_ID
-TEST F = X
-SEEK 2
-FJMP FIND_FILE_ID
-
-SEEK -1
-COPY F X
-DROP
 LINK 799
-GRAB X
+COPY M X
 
+GRAB X
 COPY 0 X
 SEEK 2
 MARK SUM
@@ -38,18 +30,36 @@ ADDI X F X
 TEST EOF
 FJMP SUM
 
+DIVI X 75 T
+
 SEEK -9999
 SEEK 2
-MARK OVERWRITE
-COPY 75 F
-SUBI X 75 X
-TEST X < 75
-FJMP OVERWRITE
 
-COPY X F
+MARK FAK
+COPY 75 F
+SUBI T 1 T
+TJMP FAK
+MODI X 75 F
+```
+
+### [XB](XB.exa) (global)
+```asm
+LINK 800
+GRAB 199
+COPY M X
+MARK SEC
+TEST X = F
+TJMP FILE
+SEEK 2
+JUMP SEC
+
+MARK FILE
+SEEK 1
+COPY F M
+
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 523    | 28   | 2        |
+| 413    | 32   | 3        |

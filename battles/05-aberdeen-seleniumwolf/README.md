@@ -1,6 +1,6 @@
 # 5: Aberdeen (selenium_wolf)
 
-<div align="center"><img src="EXAPUNKS - Aberdeen (2022-12-05-19-40-00).gif" /></div>
+<div align="center"><img src="EXAPUNKS - Aberdeen (2023-12-01-13-43-05).gif" /></div>
 
 ## Instructions
 > To win this battle you must occupy a majority of the hosts for as long as possible. You occupy a host if you have more EXAs in it than your opponent.
@@ -15,45 +15,37 @@
 
 ## Solution
 
+### [XA](XA.exa) (global)
+```asm
+LINK 800
+LINK 801
+LINK 799
+MARK STAY
+JUMP STAY
+```
+
 ### [XB](XB.exa) (global)
 ```asm
 LINK 800
+MARK LO
+REPL SPAWN1
+REPL SPAWN2
+REPL SPAWN3
+REPL SPAWN4
+
+MARK SPAWN1
+LINK 800
+JUMP LO
+MARK SPAWN2
 LINK 801
-
-MARK DUPE_LOOP
-REPL DUPE
-JUMP DUPE_LOOP
-
-MARK DUPE
-LINK 800
-LINK 800
-LINK -1
-REPL NUKE
-LINK -1
-LINK 801
-JUMP DUPE
-
-MARK NUKE
-COPY 1 #NUKE
-```
-
-### [XC](XC.exa) (global)
-```asm
-LINK 800
+JUMP LO
+MARK SPAWN3
 LINK 802
+JUMP LO
+MARK SPAWN4
+LINK -1
+JUMP LO
+MARK SPAWN5
 
-MARK DUPE_LOOP
-REPL DUPE
-JUMP DUPE_LOOP
-
-MARK DUPE
-LINK 800
-LINK 800
-@REP 5
-REPL IDLE
-@END
-
-MARK IDLE
-JUMP IDLE
 ```
 

@@ -1,6 +1,6 @@
 # 30: Holman Dynamics (Sales System)
 
-<div align="center"><img src="EXAPUNKS - Holman Dynamics (4459, 119, 7, 2022-12-05-19-38-24).gif" /></div>
+<div align="center"><img src="EXAPUNKS - Holman Dynamics (6410, 78, 7, 2023-12-01-13-40-44).gif" /></div>
 
 ## Instructions
 > Create a file in your host containing the contiguous 16-value sequence from the garbage file (file 199) that is a valid credit card number. There will be exactly one such sequence.
@@ -11,98 +11,95 @@
 
 ### [XA](XA.exa) (global)
 ```asm
+MAKE
+MARK LO
+COPY M T
+FJMP RESET
+SUBI T 1 T
+COPY T F
+FJMP EVEN
+MULI T 2 T
+MODI T 9 T
+TJMP S1
+ADDI T 9 T
+MARK S1
+ADDI X T X
+MARK EVEN
+COPY M T
+FJMP RESET
+SUBI T 1 T
+COPY T F
+FJMP SIZE
+MODI T 9 T
+TJMP S2
+ADDI T 9 T
+MARK S2
+ADDI X T X
+MARK SIZE
+SEEK -9999
+SEEK 15
+TEST EOF
+TJMP LO
+MODI X 10 T
+FJMP WIN
+NOTE STRIP FIRST ELEMENT
+COPY 0 X
+SEEK -9999
+VOID F
+MARK RECALC
+COPY F T
+FJMP S3
+MULI T 2 T
+MODI T 9 T
+TJMP S3
+ADDI T 9 T
+MARK S3
+ADDI X T X
+TEST EOF
+TJMP EVEN
+COPY F T
+FJMP S4
+MODI T 9 T
+TJMP S4
+ADDI T 9 T
+MARK S4
+ADDI X T X
+JUMP RECALC
+
+MARK RESET
+WIPE
+MAKE
+COPY 0 X
+JUMP LO
+
+MARK WIN
+DROP
 LINK 800
 LINK 802
 LINK 799
-GRAB 199
-
-; FIX EDGE CASE VERY END
-SEEK 9999
-COPY -9999 F
-SEEK -9999
-
-; FIND 16 SEQ
-MARK RESET
-COPY 0 X
-MARK LOOP
-ADDI X 1 X
-TEST F < 0
-TJMP RESET
-
-TEST X > 15
-FJMP LOOP
-
-; FOUND
-SEEK -16
-COPY 0 X
-COPY 0 T
-
-@REP 8
-COPY F M
-ADDI M T T
-SEEK 1
-@END
-
-SEEK -15
-@REP 8
-ADDI T F T
-SEEK 1
-@END
-
-SWIZ T 0001 T
-FJMP VALID
-
-; RESET COUNTER TO -1
-SEEK -1
-COPY 15 X
-JUMP LOOP
-
-
-MARK VALID
-MODE
-REPL DUPE
-SEEK -17
-
-@REP 16
-COPY F M
-@END
-
-SEEK 9999
-SEEK -1
-VOID F
-
+KILL
 HALT
 
-MARK DUPE
-MAKE
-@REP 16
-COPY M F
-@END
-
-LINK -1
-LINK -1
-LINK -1
-KILL
 ```
 
 ### [XB](XB.exa) (global)
 ```asm
-; TRANSFORM ODD #
-JUMP LOOP
-
-MARK GREATER
-SUBI X 9 M
-
-MARK LOOP
-MULI M 2 X
-TEST X > 9
-TJMP GREATER
-
+LINK 800
+LINK 802
+LINK 799
+GRAB 199
+MARK LO
+ADDI F 1 X
+TEST X = -9998
+FJMP OUT
+COPY 0 X
+MARK OUT
 COPY X M
-JUMP LOOP
+TEST EOF
+FJMP LO
 ```
 
 #### Results
 | Cycles | Size | Activity |
 |--------|------|----------|
-| 4459   | 119  | 7        |
+| 6410   | 78   | 7        |
