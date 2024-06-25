@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
+#include <ostream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -55,16 +56,17 @@ struct Info {
 	string description;
 	string title;
 	string path;
-	fs::path gif;
 };
 
 // Vars
 int maxChars = 0;
 map<string, Solution> solutions;
 map<string, Info> dataMap;
-vector<string> ids = { };
+map<string, fs::path> gifMap;
+vector<string> levels = { };
 vector<string> battles = { };
 vector<string> bonus = { };
+vector<GIF> gifs = { };
 
 // Utils
 string readString(ifstream& stream) {
@@ -95,57 +97,65 @@ bool compareTime(const GIF& a, const GIF& b)
 // TODO: Include leaderboard as well?
 int main(int argc, char* argv[])
 {
-	cout << "EXA-Parser: " << endl;
-	cout << "  input 1: Directory to saves" << endl;
-	cout << "  input 2: Directory to gifs" << endl;
-	cout << "  input 3: Directory to descriptions" << endl;
-	cout << "  input 4: Output Directory" << endl;
-	cout << "  input 5: data.txt" << endl << endl;
+	cout << "Usage: [script_name]" << endl;
+	cout << "    or [script_name] saves_dir gifs_dir descriptions_dir output_dir data.txt" << endl;
 
 	fs::path pathSaves = "../temp/saves";
 	if (argc >= 2) pathSaves = argv[1];
-	if (!fs::is_directory(pathSaves)) {
-		cout << "Directory for save is invalid " << fs::current_path() << endl << endl;
+	cout << "Save directory: " << pathSaves;
+	if (fs::is_directory(pathSaves)) {
+		cout << endl;
+	} else {
+		cout << " invalid!" << endl << endl;
 		return 1;
 	}
 
 	fs::path pathGIFs = "../temp/gifs";
 	if (argc >= 3) pathGIFs = argv[2];
-	if (!fs::is_directory(pathGIFs)) {
-		cout << "Directory for GIFs is invalid " << fs::current_path() << endl << endl;
+	cout << "GIFs directory: " << pathGIFs;
+	if (fs::is_directory(pathGIFs)) {
+		cout << endl;
+	} else {
+		cout << " invalid!" << endl << endl;
 		return 1;
 	}
 
 	fs::path pathDescriptions = "../temp/descriptions";
 	if (argc >= 4) pathDescriptions = argv[3];
-	if (!fs::is_directory(pathDescriptions)) {
-		cout << "Directory for descriptions is invalid " << fs::current_path() << endl << endl;
+	cout << "Descriptions directory: " << pathDescriptions;
+	if (fs::is_directory(pathDescriptions)) {
+		cout << endl;
+	} else {
+		cout << " invalid!" << endl << endl;
 		return 1;
 	}
 
 	fs::path pathOutput = "..";
 	if (argc >= 5) pathOutput = argv[4];
-	if (!fs::is_directory(pathOutput)) {
-		fs::create_directories(pathOutput);
-
-		if (!fs::is_directory(pathOutput)) {
-			cout << "Directory for output is invalid " << fs::current_path() << endl << endl;
-			return 1;
-		}
+	cout << "Output directory: " << pathOutput;
+	if (fs::is_directory(pathOutput)) {
+		cout << endl;
+	} else {
+		cout << " invalid!" << endl << endl;
+		return 1;
 	}
 
 	fs::path pathData = "data.txt";
 	if (argc >= 6) pathData = argv[5];
 	ifstream dataStream(pathData);
-	if (!dataStream) {
-		cout << "File (data.txt) not found!\n";
+	cout << "Data file: " << pathData;
+	if (dataStream) {
+		cout << endl;
+	} else {
+		cout << " invalid!" << endl << endl;
 		return 1;
 	}
+
+	cout << endl;
 
 	// Loop all gifs, they are badly named, so instead assume they were saved in order (sort by time)
 	cout << "Parse GIFs:" << endl;
 
-	vector<GIF> gifs = { };
 	for (const auto& entry : fs::directory_iterator(pathGIFs)) {
 		gifs.push_back({ entry.path(), fs::last_write_time(entry.path()) });
 
@@ -197,24 +207,30 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		Info info = { id, description, title, path, gifs[globalCounter].name };
+		cout << "    " << id << ": " << title;
+		if (globalCounter < gifs.size()) {
+			gifMap[id] = gifs[globalCounter].name;
+		}
+		Info info = { id, description, title, path };
 
 		int total = 1 + 5 + title.length() + 12 + path.length() + 1;
 		if (total > maxChars) maxChars = total;
 
-		cout << "    " << id << ": " << title << endl;
-
 		dataMap[id] = info;
 
-		if(!isBattle) ids.push_back(id);
-		else battles.push_back(id);
-		if(isBonus) bonus.push_back(id);
+		if (isBattle) 
+			battles.push_back(id);
+		else if (isBonus)
+			bonus.push_back(id);
+		else
+			levels.push_back(id);
 
 		globalCounter++;
 	}
+	cout << endl;
 
 	// Loop all saves, overwrite if cycles is better
-	cout << endl << "Parse Saves:" << endl;
+	cout << endl << "Parse saves:" << endl;
 
 	for (const auto& entry : fs::directory_iterator(pathSaves)) {
 		ifstream solutionStream(entry.path(), ios::binary);
@@ -256,13 +272,12 @@ int main(int argc, char* argv[])
 				break;
 			}
 		}
-
 		solutionStream.read(reinterpret_cast<char*>(&i), sizeof(i));
 
 		Solution solution = {
 			id,
 			name,
-			100, // TODO: Not saved in the file format?
+			0, 
 			0,
 			0,
 			cycles,
@@ -270,6 +285,12 @@ int main(int argc, char* argv[])
 			activity,
 			entry.path()
 		};
+		// TODO: Battle data not saved in the file format?
+		if (find(battles.begin(), battles.end(), id) != battles.end())
+			solution.wins = 100;
+
+		if (solution.cycles == 0 && solution.wins == 0)
+			continue;
 
 		for (int j = 0; j < i; j++) {
 			solutionStream.ignore(); // Magic 0xA
@@ -294,16 +315,13 @@ int main(int argc, char* argv[])
 			Solution old = solutions[id];
 			if (old.cycles > solution.cycles) {
 				cout << "  + " << id << ": " << name << endl;
-
 				solutions[id] = solution;
 			}
 			else {
 				cout << "  - " << id << ": " << name << endl;
 			}
-		}
-		else {
+		} else {
 			cout << "    " << id << ": " << name << endl;
-
 			solutions[id] = solution;
 		}
 	}
@@ -367,7 +385,8 @@ int main(int argc, char* argv[])
 			readmeOut << line << endl;
 			skip = true;
 
-			// Create table
+			// Print solutions
+			readmeOut << "#### Levels" << endl;
 			readmeOut << "| Level";
 			for (int i = 0; i < maxChars - 5 + 1 + 4; i++) readmeOut << ' ';
 			readmeOut << "| Cycles | Size | Activity |" << endl;
@@ -376,52 +395,68 @@ int main(int argc, char* argv[])
 			for (int i = 0; i < maxChars + 2 + 4; i++) readmeOut << '-';
 			readmeOut << "|--------|------|----------|" << endl;
 
-			for (int i = 0; i < 34; i++) {
-				Info info = dataMap[ids[i]];
-				readmeOut << "| [" << to_string(i + 1) << ": " << info.title << "](solutions/" << info.path << ") ";
+			for (int i = 0; i < levels.size(); i++) {
+				Info info = dataMap[levels[i]];
+				const auto& solutionEntry = solutions.find(levels[i]);
+				if (solutionEntry == solutions.end()) {
+					readmeOut << "| " << to_string(i + 1) << ": " << info.title << " | N/A | N/A | N/A |" << endl;
+				} else {
+					readmeOut << "| [" << to_string(i + 1) << ": " << info.title << "](solutions/" << info.path << ") ";
 
-				int total = maxChars - (1 + info.title.length() + 12 + info.path.length() + 1);
-				for (int j = 0; j < total; j++) readmeOut << ' ';
-
-				if (i < 9) readmeOut << ' ';
-
-				Solution solution = solutions[ids[i]];
-				readmeOut << "| ";
-				writeNum(readmeOut, solution.cycles, CYCLE_N);
-				readmeOut << " | ";
-				writeNum(readmeOut, solution.size, SIZE_N);
-				readmeOut << " | ";
-				writeNum(readmeOut, solution.activity, ACTIVITY_N);
-				readmeOut << " |" << endl;
+					Solution solution = solutionEntry->second;
+					readmeOut << "| ";
+					writeNum(readmeOut, solution.cycles, CYCLE_N);
+					readmeOut << " | ";
+					writeNum(readmeOut, solution.size, SIZE_N);
+					readmeOut << " | ";
+					writeNum(readmeOut, solution.activity, ACTIVITY_N);
+					readmeOut << " |" << endl;
+				}
 			}
 
-			// Create battle
-			readmeOut << endl << "| Battle";
-			for (int i = 0; i < maxChars - 5 + 3; i++) readmeOut << ' ';
-			readmeOut << "| Wins | Draws | Losses | Rating |" << endl;
-
-			readmeOut << "|";
-			for (int i = 0; i < maxChars + 2 + 3; i++) readmeOut << '-';
-			readmeOut << "|------|-------|--------|--------|" << endl;
-
+			// Print battle solutions
+			readmeOut << "#### Battles" << endl;
 			for (int i = 0; i < battles.size(); i++) {
 				Info info = dataMap[battles[i]];
-				readmeOut << "| [" << to_string(i + 1) << ": " << info.title << "](battles/" << info.path << ") ";
 
-				int total = maxChars - (1 + info.title.length() + 10 + info.path.length() + 1);
-				for (int j = 0; j < total; j++) readmeOut << ' ';
-
-				Solution solution = solutions[ids[i]];
-				readmeOut << "| ";
-				writeNum(readmeOut, solution.wins, 4);
-				readmeOut << " | ";
-				writeNum(readmeOut, solution.draws, 5);
-				readmeOut << " | ";
-				writeNum(readmeOut, solution.losses, 6);
-				readmeOut << " | S+     |" << endl;
+				const auto& solutionEntry = solutions.find(battles[i]);
+				if (solutionEntry == solutions.end()) {
+					readmeOut << " * " << to_string(i + 1) << ": " << info.title << "- N/A" << endl;
+				} else {
+					readmeOut << " * [" << to_string(i + 1) << ": " << info.title << "](battles/" << info.path << ")" << endl;
+				}
 			}
+			// readmeOut << endl << "| Battle";
+			// for (int i = 0; i < maxChars - 5 + 3; i++) readmeOut << ' ';
+			// readmeOut << "| Wins | Draws | Losses | Rating |" << endl;
+			//
+			// readmeOut << "|";
+			// for (int i = 0; i < maxChars + 2 + 3; i++) readmeOut << '-';
+			// readmeOut << "|------|-------|--------|--------|" << endl;
+			//
+			// for (int i = 0; i < battles.size(); i++) {
+			// 	Info info = dataMap[battles[i]];
+			//
+			// 	const auto& solutionEntry = solutions.find(battles[i]);
+			// 	if (solutionEntry == solutions.end()) {
+			// 		readmeOut << "| " << to_string(i + 1) << ": " << info.title << " | N/A | N/A | N/A |" << endl;
+			// 	} else {
+			// 		readmeOut << "| [" << to_string(i + 1) << ": " << info.title << "](battles/" << info.path << ") ";
+			//
+			// 		Solution solution = solutionEntry->second;
+			//
+			// 		readmeOut << "| ";
+			// 		writeNum(readmeOut, solution.wins, 4);
+			// 		readmeOut << " | ";
+			// 		writeNum(readmeOut, solution.draws, 5);
+			// 		readmeOut << " | ";
+			// 		writeNum(readmeOut, solution.losses, 6);
+			// 		readmeOut << " | S+     |" << endl;
+			// 	}
+			// }
 
-			// Create bonus
+			// Print bonus
+			readmeOut << "#### Bonus" << endl;
 			readmeOut << endl << "| Bonus campaign level";
 			for (int i = 0; i < maxChars - 5 + 1 + 4; i++) readmeOut << ' ';
 			readmeOut << "| Cycles | Size | Activity |" << endl;
@@ -432,21 +467,22 @@ int main(int argc, char* argv[])
 
 			for (int i = 0; i < bonus.size(); i++) {
 				Info info = dataMap[bonus[i]];
-				readmeOut << "| [" << to_string(i + 1) << ": " << info.title << "](bonus/" << info.path << ") ";
 
-				int total = maxChars - (1 + info.title.length() + 12 + info.path.length() + 1);
-				for (int j = 0; j < total; j++) readmeOut << ' ';
+				const auto& solutionEntry = solutions.find(bonus[i]);
+				if (solutionEntry == solutions.end()) {
+					readmeOut << "| " << to_string(i + 1) << ": " << info.title << " | N/A | N/A | N/A |" << endl;
+				} else {
+					readmeOut << "| [" << to_string(i + 1) << ": " << info.title << "](bonus/" << info.path << ") ";
 
-				if (i < 9) readmeOut << ' ';
-
-				Solution solution = solutions[ids[34 + i]];
-				readmeOut << "| ";
-				writeNum(readmeOut, solution.cycles, CYCLE_N);
-				readmeOut << " | ";
-				writeNum(readmeOut, solution.size, SIZE_N);
-				readmeOut << " | ";
-				writeNum(readmeOut, solution.activity, ACTIVITY_N);
-				readmeOut << " |" << endl;
+					Solution solution = solutionEntry->second;
+					readmeOut << "| ";
+					writeNum(readmeOut, solution.cycles, CYCLE_N);
+					readmeOut << " | ";
+					writeNum(readmeOut, solution.size, SIZE_N);
+					readmeOut << " | ";
+					writeNum(readmeOut, solution.activity, ACTIVITY_N);
+					readmeOut << " |" << endl;
+				}
 			}
 		}
 		else if (line == "<!-- EXA_END -->") {
@@ -469,8 +505,15 @@ int main(int argc, char* argv[])
 
 	cout << endl << "  Making solutions:" << endl;
 
-	for (int i = 0; i < 34; i++) {
-		Info info = dataMap[ids[i]];
+	for (int i = 0; i < levels.size(); i++) {
+		Info info = dataMap[levels[i]];
+		const auto& solutionEntry = solutions.find(levels[i]);
+		if (solutionEntry == solutions.end()) {
+			cout << "Solution not found for " << info.id << " - skipping..." << endl;
+			continue;
+		}
+		Solution solution = solutionEntry->second;
+		cerr << solution.name << " " << solution.cycles << " " << solution.id << " " << levels[i] << endl;
 
 		fs::create_directories(pathOutputSolutions / info.path);
 		ofstream readmeOut(pathOutputSolutions / info.path / "README.md");
@@ -478,8 +521,15 @@ int main(int argc, char* argv[])
 		readmeOut << "# " << to_string(i + 1) << ": " << info.title << endl << endl;
 
 		// Copy GIF
-		fs::copy(info.gif, pathOutputSolutions / info.path / info.gif.filename());
-		readmeOut << "<div align=\"center\"><img src=\"" << info.gif.filename().string() << "\" /></div>" << endl << endl;
+		const auto& gifEntry = gifMap.find(info.id);
+		if (gifEntry == gifMap.end()) {
+			cout << "GIF not found for solution ID " << info.id << " - " << info.title << endl;
+			cout << "Please export all your GIFs into the gifs folder and make sure that their creation timestamps are in the right order!" << endl;
+			return 1;
+		}
+		const fs::path& gifPath = gifEntry->second;
+		fs::copy(gifPath, pathOutputSolutions / info.path / gifPath.filename());
+		readmeOut << "<div align=\"center\"><img src=\"" << gifPath.filename().string() << "\" /></div>" << endl << endl;
 
 		// Read description files
 		ifstream descriptionStream(pathDescriptions / info.description);
@@ -494,8 +544,6 @@ int main(int argc, char* argv[])
 		readmeOut << "## Solution" << endl << endl;
 
 		// Add source as well
-		Solution solution = solutions[ids[i]];
-
 		for (int j = 0; j < solution.exas.size(); j++) {
 			EXA exa = solution.exas[j];
 			readmeOut << "### [" << exa.name << "](" << exa.name << ".exa) (" << (exa.local ? "local" : "global") << ")" << endl;
@@ -523,7 +571,7 @@ int main(int argc, char* argv[])
 		writeNum(readmeOut, solution.activity, ACTIVITY_N);
 		readmeOut << " |" << endl;
 
-		cout << "    " << info.title << endl;
+		cout << info.id << " - " << info.title << " - " << gifEntry->second << endl;
 	}
 
 	// Create battles folder
@@ -533,6 +581,12 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < battles.size(); i++) {
 		Info info = dataMap[battles[i]];
+		const auto& solutionEntry = solutions.find(battles[i]);
+		if (solutionEntry == solutions.end()) {
+			cout << "Solution not found for " << info.id << " - skipping..." << endl;
+			continue;
+		}
+		Solution solution = solutionEntry->second;
 
 		fs::create_directories(pathOutputBattles / info.path);
 		ofstream readmeOut(pathOutputBattles / info.path / "README.md");
@@ -540,8 +594,15 @@ int main(int argc, char* argv[])
 		readmeOut << "# " << to_string(i + 1) << ": " << info.title << endl << endl;
 
 		// Copy GIF
-		fs::copy(info.gif, pathOutputBattles / info.path / info.gif.filename());
-		readmeOut << "<div align=\"center\"><img src=\"" << info.gif.filename().string() << "\" /></div>" << endl << endl;
+		const auto& gifEntry = gifMap.find(info.id);
+		if (gifEntry == gifMap.end()) {
+			cout << "GIF not found for battle ID " << info.id << " - " << info.title << endl << endl;
+			cout << "Please export all your GIFs into the gifs folder and make sure that their creation timestamps are in the right order!" << endl;
+			return 1;
+		}
+		const fs::path& gifPath = gifEntry->second;
+		fs::copy(gifPath, pathOutputBattles / info.path / gifPath.filename());
+		readmeOut << "<div align=\"center\"><img src=\"" << gifPath.filename().string() << "\" /></div>" << endl << endl;
 
 		// Read description files
 		ifstream descriptionStream(pathDescriptions / info.description);
@@ -556,8 +617,6 @@ int main(int argc, char* argv[])
 		readmeOut << "## Solution" << endl << endl;
 
 		// Add source as well
-		Solution solution = solutions[battles[i]];
-
 		for (int j = 0; j < solution.exas.size(); j++) {
 			EXA exa = solution.exas[j];
 			readmeOut << "### [" << exa.name << "](" << exa.name << ".exa) (" << (exa.local ? "local" : "global") << ")" << endl;
@@ -573,7 +632,7 @@ int main(int argc, char* argv[])
 		// Copy OG file save as well
 		fs::copy(solution.path, pathOutputBattles / info.path / solution.path.filename());
 
-		cout << "    " << info.title << endl;
+		cout << info.id << " - " << info.title << " - " << gifEntry->second << endl;
 	}
 
 	// Create bonus folder
@@ -583,6 +642,12 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < bonus.size(); i++) {
 		Info info = dataMap[bonus[i]];
+		const auto& solutionEntry = solutions.find(bonus[i]);
+		if (solutionEntry == solutions.end()) {
+			cout << "Solution not found for " << info.id << " - skipping..." << endl;
+			continue;
+		}
+		Solution solution = solutionEntry->second;
 
 		fs::create_directories(pathOutputBonus / info.path);
 		ofstream readmeOut(pathOutputBonus / info.path / "README.md");
@@ -590,8 +655,15 @@ int main(int argc, char* argv[])
 		readmeOut << "# " << to_string(i + 1) << ": " << info.title << endl << endl;
 
 		// Copy GIF
-		fs::copy(info.gif, pathOutputBonus / info.path / info.gif.filename());
-		readmeOut << "<div align=\"center\"><img src=\"" << info.gif.filename().string() << "\" /></div>" << endl << endl;
+		const auto& gifEntry = gifMap.find(info.id);
+		if (gifEntry == gifMap.end()) {
+			cout << "GIF not found for bonus ID " << info.id << " - " << info.title << endl << endl;
+			cout << "Please export all your GIFs into the gifs folder and make sure that their creation timestamps are in the right order!" << endl;
+			return 1;
+		}
+		const fs::path& gifPath = gifEntry->second;
+		fs::copy(gifPath, pathOutputBonus / info.path / gifPath.filename());
+		readmeOut << "<div align=\"center\"><img src=\"" << gifPath.filename().string() << "\" /></div>" << endl << endl;
 
 		// Read description files
 		ifstream descriptionStream(pathDescriptions / info.description);
@@ -606,8 +678,6 @@ int main(int argc, char* argv[])
 		readmeOut << "## Solution" << endl << endl;
 
 		// Add source as well
-		Solution solution = solutions[bonus[i]];
-
 		for (int j = 0; j < solution.exas.size(); j++) {
 			EXA exa = solution.exas[j];
 			readmeOut << "### [" << exa.name << "](" << exa.name << ".exa) (" << (exa.local ? "local" : "global") << ")" << endl;
@@ -635,6 +705,6 @@ int main(int argc, char* argv[])
 		writeNum(readmeOut, solution.activity, ACTIVITY_N);
 		readmeOut << " |" << endl;
 
-		cout << "    " << info.title << endl;
+		cout << info.id << " - " << info.title << " - " << gifEntry->second << endl;
 	}
 }
